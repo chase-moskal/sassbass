@@ -1,0 +1,37 @@
+{
+	"name": "sassbass",
+	"version": "0.0.0-dev.0",
+	"description": "compile or watch sass directories recursively",
+	"main": "index",
+	"bin": {
+		"sassbass": "cli"
+	},
+	"scripts": {
+		"prepare": "npm test",
+		"test": "rimraf test/dist && node cli --indir test/src --outdir test/dist && if [ ! -f test/dist/test.css ]; then exit 1; fi"
+	},
+	"keywords": [
+		"sass",
+		"scss",
+		"watch",
+		"recursive",
+		"directories"
+	],
+	"author": "Chase Moskal <chasemoskal@gmail.com>",
+	"license": "ISC",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/chase-moskal/sassbass.git"
+	},
+	"dependencies": {
+		"chokidar": "2.0.4",
+		"fast-glob": "2.2.4",
+		"fibers": "3.1.1",
+		"sass": "1.15.1",
+		"shelljs": "0.8.3",
+		"yargs": "12.0.5"
+	},
+	"devDependencies": {
+		"rimraf": "2.6.2"
+	}
+}
