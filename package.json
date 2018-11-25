@@ -1,10 +1,10 @@
 {
 	"name": "sassbass",
-	"version": "0.0.0-dev.0",
+	"version": "0.0.0-dev.1",
 	"description": "compile or watch sass directories recursively",
-	"main": "index",
+	"main": "index.js",
 	"bin": {
-		"sassbass": "cli"
+		"sassbass": "cli.js"
 	},
 	"scripts": {
 		"prepare": "npm test",
