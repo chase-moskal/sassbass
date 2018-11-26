@@ -1,6 +1,6 @@
 {
 	"name": "sassbass",
-	"version": "0.0.0-dev.3",
+	"version": "0.0.0-dev.4",
 	"description": "compile or watch sass directories recursively",
 	"main": "index.js",
 	"bin": {
