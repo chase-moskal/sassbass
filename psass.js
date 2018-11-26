@@ -4,6 +4,7 @@ const path = require("path")
 const sass = require("sass")
 const fiber = require("fibers")
 const shelljs = require("shelljs")
+const fastGlob = require("fast-glob")
 
 const toolbox = require("./toolbox")
 
@@ -36,37 +37,9 @@ async function compile({file, outFile, sourceMap}) {
 	await writeFile(outFile, result.css)
 }
 
-// async function readDependencyGraph({dir}) {
-
-// }
-
-// class SassDependency {
-
-// 	constructor(sassFile, parent) {
-// 		this.sassFile = sassFile
-// 		this.parent = parent
-// 		this.children = []
-// 	}
-
-// 	addChild(sassFile) {
-// 		const child = new SassDependency(sassFile, this)
-// 		this.children.push(child)
-// 	}
-
-// 	get chain() {
-// 		const c = [this.sassFile]
-// 		let node = this
-// 		while (node.parent) {
-// 			c.push(node.parent.sassFile)
-// 			node = node.parent
-// 		}
-// 		return c
-// 	}
-// }
-
-async function listRelatedFiles(file, relativeDirectory) {
+async function listChildren(file, relativeDirectory) {
 	const result = await render({file})
-	const absolutePaths = Array.from(result.stats.includedFiles)
+	const absolutePaths = Array.from(result.stats.includedFiles).slice(1)
 	const absoluteDirectory = path.resolve(relativeDirectory)
 	const relativePaths = absolutePaths.map(absolute =>
 		toolbox.rebasePath({
@@ -80,18 +53,83 @@ async function listRelatedFiles(file, relativeDirectory) {
 		return path.normalize(`${dir}/${name}.scss`)
 	})
 	return fixedExtensions
-	// const dependency = new SassDependency(file, parent)
-	// const includes = Array.from(result.stats.includedFiles).slice(1)
-	// console.warn("INCLUDES", file, includes)
-	// for (include of includes) {
-	// 	dependency.addChild(include)
-	// 	await crawlDependencies(include, dependency)
-	// }
-	// return dependency
 }
+
+// async function makeSassNode(file, baseDirectory) {
+// 	const node = new SassNode(file, undefined)
+// 	const children = await listChildren(file, baseDirectory)
+// 	for (child of children) {
+// 		node.addChild(child)
+// 	}
+// 	return node
+// }
+
+async function readSassGraph(directory) {
+	const sassFiles = await fastGlob([`${directory}/**/*.scss`])
+	const root = new SassNode()
+	const nodes = await Promise.all(
+		sassFiles.map(async sassFile => {
+			const node = root.addChild(sassFile)
+			// const node = new SassNode(file)
+			const children = await listChildren(sassFile, directory)
+			for (child of children) {
+				node.addChild(child)
+			}
+			return node
+		})
+	)
+	return root
+}
+
+class SassNode {
+
+	constructor(sassFile, parent) {
+		this.sassFile = sassFile
+		this.children = []
+		this.parent = parent
+	}
+
+	addChild(sassFile) {
+		const child = new SassNode(sassFile, this)
+		this.children.push(child)
+		return child
+	}
+
+	get chain() {
+		const c = [this.sassFile]
+		let node = this
+		while (node.parent && node.parent.sassFile) {
+			c.push(node.parent.sassFile)
+			node = node.parent
+		}
+		return c
+	}
+
+	find(sassFile) {
+		if (this.sassFile === sassFile) return [this]
+		else {
+			for (const child of this.children) {
+				const result = child.find(sassFile)
+				if (result) return result
+			}
+		}
+		return undefined
+	}
+}
+
+/*
+
+[
+	{
+		file: "...",
+		children: []
+	}
+]
+
+*/
 
 module.exports = {
 	render,
 	compile,
-	listRelatedFiles
+	readSassGraph
 }
