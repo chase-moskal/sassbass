@@ -27,10 +27,11 @@ async function watchDir({indir, outdir, debug}) {
 		const endsWithScss = /\.scss$/i.test(sassFile)
 		if (!endsWithScss) return
 
-		const relevantPaths = await psass.listRelatedFiles(sassFile, indir)
-		console.log("RELEVANT", relevantPaths)
+		const ascensionGraph = await psass.makeAscensionGraph(indir)
+		const ascensionMember = ascensionGraph.find(member => member.sassFile === sassFile)
+		const affectedFiles = ascensionMember.related
 
-		await Promise.all(relevantPaths.map(async file => {
+		await Promise.all(affectedFiles.map(async file => {
 			try {
 				const outFile = toolbox.rebasePath({
 					path: file,
@@ -48,26 +49,6 @@ async function watchDir({indir, outdir, debug}) {
 				console.error(`scss error: ${error.message}`)
 			}
 		}))
-
-		// const absolutePath = path.resolve(sassFile)
-
-		// const outFile = toolbox.rebasePath({
-		// 	path: sassFile,
-		// 	directory: indir,
-		// 	newDirectory: outdir
-		// })
-
-		// try {
-		// 	await psass.compile({
-		// 		file: sassFile,
-		// 		outFile,
-		// 		sourceMap: debug
-		// 	})
-		// 	console.log(`compiled "${sassFile}" to "${outFile}"`)
-		// }
-		// catch (error) {
-		// 	console.error(`error compiling "${sassFile}" to "${outFile}": ${error.message}`)
-		// }
 	})
 }
 

@@ -55,32 +55,6 @@ async function listChildren(file, relativeDirectory) {
 	return fixedExtensions
 }
 
-// async function makeSassNode(file, baseDirectory) {
-// 	const node = new SassNode(file, undefined)
-// 	const children = await listChildren(file, baseDirectory)
-// 	for (child of children) {
-// 		node.addChild(child)
-// 	}
-// 	return node
-// }
-
-async function readSassGraph(directory) {
-	const sassFiles = await fastGlob([`${directory}/**/*.scss`])
-	const root = new SassNode()
-	const nodes = await Promise.all(
-		sassFiles.map(async sassFile => {
-			const node = root.addChild(sassFile)
-			// const node = new SassNode(file)
-			const children = await listChildren(sassFile, directory)
-			for (child of children) {
-				node.addChild(child)
-			}
-			return node
-		})
-	)
-	return root
-}
-
 async function makeAscensionGraph(directory) {
 
 	// get all sass files
@@ -114,53 +88,6 @@ async function makeAscensionGraph(directory) {
 	// return graph
 	return ascensionGraph
 }
-
-class SassNode {
-
-	constructor(sassFile, parent) {
-		this.sassFile = sassFile
-		this.children = []
-		this.parent = parent
-	}
-
-	addChild(sassFile) {
-		const child = new SassNode(sassFile, this)
-		this.children.push(child)
-		return child
-	}
-
-	get chain() {
-		const c = [this.sassFile]
-		let node = this
-		while (node.parent && node.parent.sassFile) {
-			c.push(node.parent.sassFile)
-			node = node.parent
-		}
-		return c
-	}
-
-	find(sassFile) {
-		if (this.sassFile === sassFile) return [this]
-		else {
-			for (const child of this.children) {
-				const result = child.find(sassFile)
-				if (result) return result
-			}
-		}
-		return undefined
-	}
-}
-
-/*
-
-[
-	{
-		file: "...",
-		children: []
-	}
-]
-
-*/
 
 module.exports = {
 	render,
