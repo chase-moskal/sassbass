@@ -5,16 +5,31 @@
 
 # sassbass
 
-sassbass is a cli tool which can compile and watch SCSS files from the input directory into CSS files in the output directory
+sassbass compiles directories of SCSS files
 
-1. **install sassbass**
-
+1. **install sassbass**  
 	`npm install --save-dev sassbass`
 
-2. **use sassbass**
-
+2. **use sassbass**  
 	`sassbass --indir src --outdir dist`
 
-	- watch mode
-
+	- watch mode  
 		`sassbass --indir src --outdir dist --watch`
+
+	- source maps  
+		`sassbass --indir src --outdir dist --sourcemap`
+
+	- watch mode with source maps  
+		`sassbass --indir src --outdir dist --sourcemap --watch`
+
+3. **node functions available**
+
+	```js
+	const sassbass = require("sassbass")
+
+	// compile directory of scss
+	sassbass.compileDirectory({indir: "src", outdir: "dist", sourceMap: true})
+
+	// watch directory of scss
+	sassbass.watchDirectory({indir: "src", outdir: "dist", sourceMap: true})
+	```

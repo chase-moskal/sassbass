@@ -32,7 +32,9 @@ async function render({file, outFile, sourceMap}) {
 }
 
 /**
- * Compile a single SCSS file
+ * Compile a single SCSS file and save it to disk
+ * - doesn't save partials which start with underscore
+ * - also saves source map, if enabled – even for partials
  * - parents (importers) of the file are not compiled
  */
 async function compile({file, outFile, sourceMap}) {
