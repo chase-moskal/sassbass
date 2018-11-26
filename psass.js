@@ -32,6 +32,8 @@ async function render({file, sourceMap, outFile}) {
 }
 
 async function compile({file, outFile, sourceMap}) {
+	const startsWithUnderscore = /^_/i.test(path.basename(file))
+	if (startsWithUnderscore) return
 	const result = await render({file, outFile, sourceMap})
 	shelljs.mkdir("-p", path.parse(outFile).dir)
 	await writeFile(outFile, result.css)
