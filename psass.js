@@ -1,22 +1,16 @@
 
-const fs = require("fs")
-const path = require("path")
 const sass = require("sass")
+const path = require("path")
 const fiber = require("fibers")
 const shelljs = require("shelljs")
 const fastGlob = require("fast-glob")
 
 const toolbox = require("./toolbox")
 
-async function writeFile(file, data) {
-	return new Promise((resolve, reject) => {
-		fs.writeFile(file, data, error => {
-			if (error) reject(error)
-			else resolve()
-		})
-	})
-}
-
+/**
+ * Render a single SCSS file
+ * - can be used to compile, or to gather import dependencies
+ */
 async function render({file, sourceMap, outFile}) {
 	return new Promise((resolve, reject) => {
 		sass.render({
@@ -31,14 +25,22 @@ async function render({file, sourceMap, outFile}) {
 	})
 }
 
+/**
+ * Compile a single SCSS file
+ * - parents (importers) of the file are not compiled
+ */
 async function compile({file, outFile, sourceMap}) {
 	const startsWithUnderscore = /^_/i.test(path.basename(file))
 	if (startsWithUnderscore) return
 	const result = await render({file, outFile, sourceMap})
 	shelljs.mkdir("-p", path.parse(outFile).dir)
-	await writeFile(outFile, result.css)
+	await toolbox.writeFile(outFile, result.css)
 }
 
+/**
+ * List the children of an SCSS file
+ * - results are relative from the provided directory
+ */
 async function listChildren(file, relativeDirectory) {
 	const result = await render({file})
 	const absolutePaths = Array.from(result.stats.includedFiles).slice(1)
@@ -57,12 +59,19 @@ async function listChildren(file, relativeDirectory) {
 	return fixedExtensions
 }
 
+/**
+ * Read SCSS files and produce an ascension graph
+ * - an ascension graph is an inverted dependency tree regarding SCSS imports
+ * - an ascension graph relates SCSS imports with their parents
+ * - an ascension graph is necessary for watch mode, to build upstream importers
+ *   whenever a downstream SCSS file is changed
+ */
 async function makeAscensionGraph(directory) {
 
 	// get all sass files
 	const sassFiles = await fastGlob([`${directory}/**/*.scss`])
 
-	// list children for each file
+	// list of children for each file
 	const childrenGraph = await Promise.all(
 		sassFiles.map(async sassFile => {
 			const children = await listChildren(sassFile, directory)
@@ -70,7 +79,8 @@ async function makeAscensionGraph(directory) {
 		})
 	)
 
-	// flip upside down to create ascension graph
+	// ascension graph is like an inverted children graph,
+	// it's a list of related parents for each child
 	const ascensionGraph = []
 	const addToAscensionGraph = (sassFile, relatedFile) => {
 		const member = ascensionGraph.find(m => m.sassFile === sassFile)
@@ -80,6 +90,8 @@ async function makeAscensionGraph(directory) {
 			related: [relatedFile]
 		})
 	}
+
+	// invert the children graph to produce the ascension graph
 	for (const node of childrenGraph) {
 		addToAscensionGraph(node.sassFile, node.sassFile)
 		for (const child of node.children) {
@@ -94,6 +106,5 @@ async function makeAscensionGraph(directory) {
 module.exports = {
 	render,
 	compile,
-	listChildren,
 	makeAscensionGraph
 }

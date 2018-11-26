@@ -5,7 +5,7 @@
 			"type": "node",
 			"request": "launch",
 			"name": "debug",
-			"program": "${workspaceFolder}/play",
+			"program": "${workspaceFolder}/debug",
 			"stopOnEntry": true
 		}
 	]

@@ -1,5 +1,4 @@
 
-const path = require("path")
 const chokidar = require("chokidar")
 const fastGlob = require("fast-glob")
 
