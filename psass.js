@@ -81,6 +81,40 @@ async function readSassGraph(directory) {
 	return root
 }
 
+async function makeAscensionGraph(directory) {
+
+	// get all sass files
+	const sassFiles = await fastGlob([`${directory}/**/*.scss`])
+
+	// list children for each file
+	const childrenGraph = await Promise.all(
+		sassFiles.map(async sassFile => {
+			const children = await listChildren(sassFile, directory)
+			return {sassFile, children}
+		})
+	)
+
+	// flip upside down to create ascension graph
+	const ascensionGraph = []
+	const addToAscensionGraph = (sassFile, relatedFile) => {
+		const member = ascensionGraph.find(m => m.sassFile === sassFile)
+		if (member) member.related.push(relatedFile)
+		else ascensionGraph.push({
+			sassFile,
+			related: [relatedFile]
+		})
+	}
+	for (const node of childrenGraph) {
+		addToAscensionGraph(node.sassFile, node.sassFile)
+		for (const child of node.children) {
+			addToAscensionGraph(child, node.sassFile)
+		}
+	}
+
+	// return graph
+	return ascensionGraph
+}
+
 class SassNode {
 
 	constructor(sassFile, parent) {
@@ -131,5 +165,6 @@ class SassNode {
 module.exports = {
 	render,
 	compile,
-	readSassGraph
+	listChildren,
+	makeAscensionGraph
 }
