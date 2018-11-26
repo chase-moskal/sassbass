@@ -10,14 +10,14 @@ sassbass compiles directories of SCSS files
 1. **install sassbass**  
 	`npm install --save-dev sassbass`
 
-2. **use sassbass**  
+2. **use sassbass cli**  
 	`sassbass --indir src --outdir dist`
+
+	- use source maps  
+		`sassbass --indir src --outdir dist --sourcemap`
 
 	- watch mode  
 		`sassbass --indir src --outdir dist --watch`
-
-	- source maps  
-		`sassbass --indir src --outdir dist --sourcemap`
 
 	- watch mode with source maps  
 		`sassbass --indir src --outdir dist --sourcemap --watch`
@@ -37,13 +37,13 @@ sassbass compiles directories of SCSS files
 		})
 
 		// watch directory of scss
-		const watchControl = await sassbass.watchDirectory({
+		const watch = await sassbass.watchDirectory({
 			indir: "src",
 			outdir: "dist",
 			sourceMap: true
 		})
 
 		// stop watching
-		watchControl.stop()
+		watch.stop()
 	}
 	```
