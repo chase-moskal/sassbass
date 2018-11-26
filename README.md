@@ -27,9 +27,23 @@ sassbass compiles directories of SCSS files
 	```js
 	const sassbass = require("sassbass")
 
-	// compile directory of scss
-	sassbass.compileDirectory({indir: "src", outdir: "dist", sourceMap: true})
+	async function main() {
 
-	// watch directory of scss
-	sassbass.watchDirectory({indir: "src", outdir: "dist", sourceMap: true})
+		// compile directory of scss
+		await sassbass.compileDirectory({
+			indir: "src",
+			outdir: "dist",
+			sourceMap: true
+		})
+
+		// watch directory of scss
+		const watchControl = await sassbass.watchDirectory({
+			indir: "src",
+			outdir: "dist",
+			sourceMap: true
+		})
+
+		// stop watching
+		watchControl.stop()
+	}
 	```
