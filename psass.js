@@ -11,13 +11,19 @@ const toolbox = require("./toolbox")
  * Render a single SCSS file
  * - can be used to compile, or to gather import dependencies
  */
-async function render({file, sourceMap, outFile}) {
+async function render({file, outFile, sourceMap}) {
 	return new Promise((resolve, reject) => {
 		sass.render({
 			file,
 			fiber,
+			outFile,
 			sourceMap,
-			outFile
+			sourceMapRoot: sourceMap
+				? path.relative(path.dirname(outFile), path.dirname(file))
+				: undefined,
+			sourceMapContents: sourceMap
+				? true
+				: undefined,
 		}, (error, result) => {
 			if (error) reject(error)
 			else resolve(result)
@@ -31,10 +37,20 @@ async function render({file, sourceMap, outFile}) {
  */
 async function compile({file, outFile, sourceMap}) {
 	const startsWithUnderscore = /^_/i.test(path.basename(file))
-	if (startsWithUnderscore) return
+	if (startsWithUnderscore && !sourceMap) return
+
 	const result = await render({file, outFile, sourceMap})
 	shelljs.mkdir("-p", path.parse(outFile).dir)
-	await toolbox.writeFile(outFile, result.css)
+
+	const writes = []
+
+	if (!startsWithUnderscore)
+		writes.push(toolbox.writeFile(outFile, result.css))
+
+	if (sourceMap)
+		writes.push(toolbox.writeFile(`${outFile}.map`, result.map))
+
+	await Promise.all(writes)
 }
 
 /**

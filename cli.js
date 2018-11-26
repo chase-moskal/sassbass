@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
+const sassbass = require(".")
 const yargs = require("yargs")
-const {compileDir, watchDir} = require("./index")
 
 const indir = yargs.argv.indir
 const outdir = yargs.argv.outdir
 const watch = yargs.argv.watch
-const debug = yargs.argv.debug
+const sourceMap = yargs.argv.sourcemap
 
 if (!indir) throw new Error(`arg "indir" is required`)
 if (!outdir) throw new Error(`arg "outdir" is required`)
 
-if (watch) watchDir({indir, outdir, debug})
-else compileDir({indir, outdir, debug})
+if (watch) sassbass.watchDirectory({indir, outdir, sourceMap})
+else sassbass.compileDirectory({indir, outdir, sourceMap})

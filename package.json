@@ -8,7 +8,7 @@
 	},
 	"scripts": {
 		"prepare": "npm test",
-		"test": "rimraf test/dist && node cli --indir test/src --outdir test/dist && if [ ! -f test/dist/test1.css ]; then exit 1; fi"
+		"test": "rimraf test/dist && node cli --indir test/src --outdir test/dist --sourcemap && if [ ! -f test/dist/test1.css ]; then exit 1; fi"
 	},
 	"keywords": [
 		"sass",

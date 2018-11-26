@@ -5,7 +5,10 @@ const fastGlob = require("fast-glob")
 const psass = require("./psass")
 const toolbox = require("./toolbox")
 
-async function compileDir({indir, outdir, debug}) {
+/**
+ * Compile a directory of SCSS files into CSS files in another directory
+ */
+async function compileDirectory({indir, outdir, sourceMap}) {
 	const sassFiles = await fastGlob([`${indir}/**/*.scss`])
 	await Promise.all(sassFiles.map(sassFile =>
 		psass.compile({
@@ -15,12 +18,16 @@ async function compileDir({indir, outdir, debug}) {
 				directory: indir,
 				newDirectory: outdir
 			}),
-			sourceMap: debug
+			sourceMap
 		})
 	))
 }
 
-async function watchDir({indir, outdir, debug}) {
+/**
+ * Watch a directory of SCSS files and output CSS files to another directory
+ * - starts a watch process which cannot be stopped
+ */
+async function watchDirectory({indir, outdir, sourceMap}) {
 	const watcher = chokidar.watch(indir)
 	watcher.on("all", async(event, sassFile) => {
 		const endsWithScss = /\.scss$/i.test(sassFile)
@@ -37,11 +44,7 @@ async function watchDir({indir, outdir, debug}) {
 					directory: indir,
 					newDirectory: outdir
 				})
-				await psass.compile({
-					file,
-					outFile,
-					sourceMap: debug
-				})
+				await psass.compile({file, outFile, sourceMap})
 				console.log(`scss compiled "${file}" to "${outFile}"`)
 			}
 			catch (error) {
@@ -52,6 +55,6 @@ async function watchDir({indir, outdir, debug}) {
 }
 
 module.exports = {
-	watchDir,
-	compileDir
+	watchDirectory,
+	compileDirectory
 }
