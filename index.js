@@ -52,6 +52,10 @@ async function watchDirectory({indir, outdir, sourceMap}) {
 			}
 		}))
 	})
+
+	return {
+		stop: () => watcher.close()
+	}
 }
 
 module.exports = {
