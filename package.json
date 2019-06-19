@@ -1,6 +1,6 @@
 {
 	"name": "sassbass",
-	"version": "0.0.0",
+	"version": "0.0.1",
 	"description": "compile or watch sass directories recursively",
 	"main": "index.js",
 	"bin": {
@@ -24,12 +24,12 @@
 		"url": "https://github.com/chase-moskal/sassbass.git"
 	},
 	"dependencies": {
-		"chokidar": "2.1.4",
-		"fast-glob": "2.2.6",
-		"fibers": "3.1.1",
-		"sass": "1.17.3",
+		"chokidar": "3.0.1",
+		"fast-glob": "3.0.1",
+		"fibers": "4.0.1",
+		"sass": "1.21.0",
 		"shelljs": "0.8.3",
-		"yargs": "13.2.2"
+		"yargs": "13.2.4"
 	},
 	"devDependencies": {
 		"rimraf": "2.6.3"
